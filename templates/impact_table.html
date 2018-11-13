@@ -1,0 +1,127 @@
+{% extends "index.html" %}
+{% block content %}
+
+
+<div class='container pb-2 pt-4 alert' id='resumo'>
+	<p class="lead"> Lista de notícias já avaliadas pelos usuários.</p>
+</div>
+
+<div class='row'>
+  <div class="col-8">
+    <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle mr-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Ordenar resultados
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/publish_date/desc/{{media_filter}}/{{impact}}" role='button'>Mais recentes primeiro</a>
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/publish_date/asc/{{media_filter}}/{{impact}}" role='button'>Mais antigas primeiro</a>
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/facebook_reactions/desc/{{media_filter}}/{{impact}}" role='button'>Mais reações primeiro</a>
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/facebook_reactions/asc/{{media_filter}}/{{impact}}" role='button'>Menos reações primeiro</a>
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/facebook_shares/desc/{{media_filter}}/{{impact}}" role='button'>Mais compartilhamentos primeiro</a>
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/facebook_shares/asc/{{media_filter}}/{{impact}}" role='button'>Menos compartilhamentos primeiro</a>
+      </div>
+    </div>
+   
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle mr-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Filtrar por veículo
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/{{sortby}}/{{order}}/todos/{{impact}}" role='button'>Ver todos</a>
+        {% for k, v in media_dict.items() %}
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/{{sortby}}/{{order}}/{{k}}/{{impact}}" role='button'>{{v}}</a>
+        {% endfor %}
+      </div>
+    </div>
+   
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle mr-1" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Filtrar por impacto
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/{{sortby}}/{{order}}/{{media_filter}}/todos" role='button'>Ver todos</a>
+        {% for tag in tags_list: %}
+        <a class="dropdown-item" href="/impact_table/{{offset}}/{{limit}}/{{sortby}}/{{order}}/{{media_filter}}/{{tag}}" role='button'>{{tag}}</a>
+        {% endfor %}
+      </div>
+    </div>
+    
+    <form action="" method="post">
+    <button class="btn btn-outline-secondary" name="export_csv" value="export_csv">Exportar para CSV</button> 
+    </form>
+
+    </div>
+  </div> 
+
+  <div class='col-4 text-right'>
+    <p> Exibindo {{total_records}} notícias classificadas.
+    {% if offset > 0: %}
+	<a class="btn btn-outline-secondary" href="{{prev_url}}">Ver anteriores</a> 
+	{% endif %}
+	{% if not total_records - offset < limit %}
+	<a class="btn btn-outline-secondary" href="{{next_url}}">Ver próximas</a></p>
+	{% endif %}
+  </div>
+</div>
+
+<div class='container'>
+  {% if media_filter != 'todos': %}
+  <em>Veículo: {{media_dict[media_filter]}}. </em>
+  {% endif %}
+  {% if impact != 'todos': %}
+  <em>Impacto: {{impact}}. </em>
+  {% endif %}
+  {% if media_filter != 'todos' or impact != 'todos': %}
+  <em><a href='/impact_table/0/100/publish_date/desc/todos/todos'>Limpar filtros.</a></em>
+  {% endif %}
+</div>
+
+<table class="table table-striped" id='mainTable'>
+    <thead class="thead-dark">
+    <tr><th>Data</th>
+    	  <th>Veículo</th>
+   	    <th>Publicação</th>
+   	    <th>Reações</th>
+   	    <th>Shares</th>
+	    <th>Impacto</th>
+	</tr>
+    </thead>
+    <tbody>
+	{% for row in data %}
+	<tr><td>{{row['publish_date']}}</td>
+		  <td>{{media_dict[row['media_id']]}}</td>
+      <td><a href="{{row['url']}}">{{row['title']}}</a><br>
+          {% if row['description'] != "":%}
+          {{row['description']}} 
+          {% else: %}
+          Descrição não disponível.
+          {% endif %}</td>
+		  <td>{{row['facebook_reactions']}}</td>
+		  <td>{{row['facebook_shares']}}</td>
+	    <td>{{row['tag']}}<br>
+	    	<div class="form-group">
+	    	<form method='post'>
+	    		<button value="{{row['stories_id']}}" type='submit' name='send_back' class="btn btn-outline-secondary mt-1">Limpar</button>
+	    	</form>
+	    </div>
+	    </td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+
+  <div class='col-12 text-right'>
+    <p> Exibindo {{total_records}} notícias classificadas pelos usuários.
+    {% if offset > 0: %}
+	<a class="btn btn-outline-secondary" href="{{prev_url}}">Ver anteriores</a> 
+	{% endif %}
+	{% if not total_records - offset < limit %}
+	<a class="btn btn-outline-secondary" href="{{next_url}}">Ver próximas</a></p>
+	{% endif %}
+  </div>
+</div>
+
+</div>
+
+{% endblock %}

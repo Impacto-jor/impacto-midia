@@ -1,0 +1,5 @@
+requests
+django-environ
+mediacloud
+pandas
+csv

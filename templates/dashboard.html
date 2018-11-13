@@ -1,0 +1,137 @@
+{% extends "index.html" %}
+{% block content %}
+
+<div class='container pb-2 pt-4' id='resumo'>
+	<p class="lead">Neste painel, você pode avaliar o impacto das notícias como positivo, negativo ou neutro ou acrescentar categorias personalizadas por meio do botão "Personalizar Tags". Depois de classificada, a matéria estará visível na <a href='/impact_table/0/100/publish_date/desc/todos/todos'>tabela de impacto</a>.</p>
+</div>
+
+<div class='row'>
+  <div class="col-6">
+  <div class="btn-toolbar" role="toolbar" aria-label="Toolbar with button groups">
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle mr-2" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Ordenar resultados
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/publish_date/desc/{{media_filter}}" role='button'>Mais recentes primeiro</a>
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/publish_date/asc/{{media_filter}}" role='button'>Mais antigas primeiro</a>
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/facebook_reactions/desc/{{media_filter}}" role='button'>Mais reações primeiro</a>
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/facebook_reactions/asc/{{media_filter}}" role='button'>Menos reações primeiro</a>
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/facebook_shares/desc/{{media_filter}}" role='button'>Mais compartilhamentos primeiro</a>
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/facebook_shares/asc/{{media_filter}}" role='button'>Menos compartilhamentos primeiro</a>
+      </div>
+    </div>  
+
+    <div class="dropdown">
+      <button class="btn btn-outline-secondary dropdown-toggle mr-2" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Filtrar por veículo
+      </button>
+      <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/{{sortby}}/{{order}}/todos" role='button'>Ver todos</a>
+        {% for k, v in media_dict.items() %}
+        <a class="dropdown-item" href="/dashboard/{{offset}}/{{limit}}/{{sortby}}/{{order}}/{{k}}" role='button'>{{v}}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#tagsModal">Personalizar tags</button>
+  </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="tagsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Personalizar categorias de impacto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form action='' method='post'>
+          <div class="form-group">
+            <label for="editTagList">Acrescente as etiquetas que você deseja usar separadas por vírgula.</label>
+            <input class="form-control" name="tags_list" id="editTagList" placeholder="Ex.: Positivo, Neutro, Negativo.">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button name="clear_list" class="btn btn-secondary" value="limpar">Retornar ao padrão</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class='col-6 text-right'>
+    <p>
+    {% if total_records > limit %}
+    Exibindo {{limit}} de {{total_records}} notícias encontradas.
+    {% else %}
+    Exibindo {{total_records}} notícias encontradas.
+    {% endif %}
+    {% if offset > 0: %}
+    <a class="btn btn-outline-secondary" href="{{prev_url}}">Ver anteriores</a>
+    {% endif %}
+    {% if not total_records - offset < limit %}
+    <a class="btn btn-outline-secondary" href="{{next_url}}">Ver próximas</a></p>
+	  {% endif %}
+    </p>
+  </div>
+</div>
+
+<table class="table table-striped" id='mainTable'>
+    <thead class="thead-dark">
+    <tr>
+      <th>Data</th>
+    	<th>Veículo</th>
+   	  <th>Publicação</th>
+   	  <th>Reações</th>
+   	  <th>Shares</th>   	    
+	    <th>Classificar</th>
+	</tr>
+    </thead>
+    <tbody>
+	{% for row in data[first_row:last_row] %}
+	<tr>
+    <td>{{row['publish_date']}}</td>
+		<td>{{media_dict[row['media_id']]}}</td>
+		<td><a href="{{row['url']}}">{{row['title']}}</a><br>
+		    {% if row['description'] != "":%}
+        {{row['description']}} 
+        {% else: %}
+        Descrição não disponível.
+        {% endif %}</td>
+		<td> {{row['facebook_reactions']}} </td>
+		<td> {{row['facebook_shares']}} </td>
+	  <td>
+      <form action='' method='post'>
+        {% for tag in tags_list: %}
+        <button class="btn btn-outline-primary btn-block" name='tags' type="submit" value="{{row['stories_id']}},{{tag}}">{{tag}}</button>
+        {% endfor %}
+      </form>
+	  </td>
+	</tr>
+	{% endfor %}
+	</tbody>
+</table>
+
+<div class='row'>
+  <div class='col-12 text-right'>
+    <p> Exibindo {{limit}} de {{total_records}} notícias encontradas.
+    {% if offset > 0: %}
+	<a class="btn btn-outline-secondary" href="{{prev_url}}">Ver anteriores</a> 
+	{% endif %}
+	{% if not total_records - offset < limit %}
+	<a class="btn btn-outline-secondary" href="{{next_url}}">Ver próximas</a></p>
+	{% endif %}
+  </div>
+</div>
+
+</div>
+
+{% endblock %}

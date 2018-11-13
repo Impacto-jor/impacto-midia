@@ -1,0 +1,5 @@
+.env
+.dropbox
+.ipynb_checkpoints/
+Untitled.ipynb
+__pycache__/
