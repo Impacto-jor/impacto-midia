@@ -7,9 +7,10 @@ import datetime
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
 
-input_file = 'clipping_test.csv'
-output_file = 'clipping_test_tagged.csv'
+input_file = 'clipping.csv'
+output_file = 'clipping_tagged.csv'
 tags_list = ['Positivo', 'Negativo', 'Neutro']
+
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
@@ -17,6 +18,7 @@ def index(path):
     return redirect(url_for('dashboard', offset=0, limit=25, 
                             sortby='publish_date', order='desc',
                             media_filter='todos'))
+
 
 @app.route('/dashboard/<int:offset>/<int:limit>/<sortby>/<order>/<media_filter>', methods=['GET', 'POST'])
 def dashboard(offset, limit, sortby, order, media_filter):
@@ -28,12 +30,9 @@ def dashboard(offset, limit, sortby, order, media_filter):
         df = df.sort_values(by=[f'{sortby}'], ascending=False)
     elif order == 'asc':
         df = df.sort_values(by=[f'{sortby}'], ascending=True)
-    if media_filter == 'todos':
-        pass
-    else:
+    if media_filter != 'todos':
         df = df.loc[df['media_id'] == media_filter]
     data = df.to_dict('records')
-    total_records = len(data)
     first_row = offset
     last_row = limit + offset
     next_url = '/dashboard/' + str(offset + limit) + '/' + str(limit) + f'/{sortby}/{order}/{media_filter}'
@@ -42,12 +41,11 @@ def dashboard(offset, limit, sortby, order, media_filter):
         global tags_list
         custom_tags = request.form.get('tags_list')
         clear_list = request.form.get('clear_list')
+        response = request.form.getlist('tags')
         if custom_tags:
           tags_list = custom_tags.split(',')
         if clear_list:
           tags_list = ['Positivo', 'Negativo', 'Neutro']
-          #redirect(url_for('dashboard', offset=offset, limit=limit, sortby=sortby, order=order, media_filter=media_filter, tags_list=tags_list))
-        response = request.form.getlist('tags')
         if response:
             stories_id = response[0].split(',')[0]
             tag = response[0].split(',')[1]
@@ -71,7 +69,8 @@ def dashboard(offset, limit, sortby, order, media_filter):
                            sortby=sortby,
                            order=order,
                            media_filter=media_filter,
-                           total_records=total_records)
+                           total_records = len(data))
+
 
 @app.route('/impact_table/<int:offset>/<int:limit>/<sortby>/<order>/<media_filter>/<impact>', methods=['GET', 'POST'])
 def impact_table(offset, limit, sortby, order, media_filter, impact):
@@ -83,16 +82,11 @@ def impact_table(offset, limit, sortby, order, media_filter, impact):
         df = df.sort_values(by=[f'{sortby}'], ascending=False)
     elif order == 'asc':
         df = df.sort_values(by=[f'{sortby}'], ascending=True)
-    if media_filter == 'todos':
-        pass
-    else:
+    if media_filter != 'todos':
         df = df.loc[df['media_id'] == media_filter]
-    if impact == 'todos':
-        pass
-    else:
+    if impact != 'todos':
         df = df.loc[df['tag'] == impact.capitalize()]        
     data = df.to_dict('records')
-    total_records = len(data)
     first_row = offset
     last_row = limit + offset
     next_url = '/impact_table/' + str(offset + limit) + '/' + str(limit) + f'/{sortby}/{order}/{media_filter}/{impact}'
@@ -126,4 +120,4 @@ def impact_table(offset, limit, sortby, order, media_filter, impact):
                            order=order,
                            media_filter=media_filter,
                            impact=impact,
-                           total_records=total_records)
+                           total_records = len(data))

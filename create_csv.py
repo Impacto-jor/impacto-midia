@@ -36,7 +36,7 @@ def main(midia_filename='midia.csv', subject_list=['bolsonaro', 'haddad']):
         if count % 199 == 0:
             print('Limite da API do Facebook atingido. Script voltará a rodar em uma hora.')
             print(dt.datetime.now())
-            time.sleep(2401)
+            time.sleep(3601)
 
     print('Exportando busca para csv.')
     #pd.DataFrame(stories).to_csv('new_clipping.csv', index_label='stories_id')
@@ -46,8 +46,8 @@ def main(midia_filename='midia.csv', subject_list=['bolsonaro', 'haddad']):
     df['publish_date'] = pd.to_datetime(df.publish_date)
     df['publish_date'] = df['publish_date'].dt.strftime('%d/%m/%Y')
     df['tag'] = ''
-    df.to_csv('clipping_test.csv')
-    with open('clipping_test_tagged.csv', 'a', newline='') as csvfile:
+    df.to_csv('clipping.csv')
+    with open('clipping_tagged.csv', 'w', newline='') as csvfile:
         fieldnames = ['stories_id'] + list(df)
         writer = csv.writer(csvfile)
         writer.writerow(fieldnames)

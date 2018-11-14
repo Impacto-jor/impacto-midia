@@ -3,3 +3,4 @@ django-environ
 mediacloud
 pandas
 csv
+Flask
