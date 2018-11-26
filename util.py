@@ -14,6 +14,17 @@ def add_tagged_to_csv(newcsv, linedict):
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writerow(linedict)
 
+
+def clean_story_url(story_url):
+    #Limpa redirecionamento das URLs da Folha.
+    #Pode ser amplido para corrigir problemas semelhantes em outros conjuntos de URLs.
+    if story_url.startswith('https://redir'):
+        clean_url = story_url.split('*')[-1]
+        return clean_url
+    else:
+        return story_url
+
+
 media_dict = {'38945':'Estadão',
               #'272170':'Zero Hora',
               '40252':'O Globo',

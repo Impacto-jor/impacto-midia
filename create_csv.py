@@ -5,6 +5,7 @@ import settings
 import datetime as dt
 import pandas as pd
 import csv
+from util import clean_story_url
 
 
 def main(midia_filename='midia.csv', subject_list=['bolsonaro', 'haddad']):
@@ -30,7 +31,8 @@ def main(midia_filename='midia.csv', subject_list=['bolsonaro', 'haddad']):
     print(f'Acrescentando informações do Facebook para {len(stories)}')
     fb = FacebookRequest(settings.FACEBOOK_TOKEN)
     for count, story in enumerate(stories, 1):
-        info = fb.url_stats(story['url'])
+        story_url = clean_story_url(story['url'])
+        info = fb.url_stats(story_url)
         for key in info.keys():
             story[key] = info[key]
         if count % 199 == 0:
@@ -39,15 +41,14 @@ def main(midia_filename='midia.csv', subject_list=['bolsonaro', 'haddad']):
             time.sleep(3601)
 
     print('Exportando busca para csv.')
-    #pd.DataFrame(stories).to_csv('new_clipping.csv', index_label='stories_id')
     df = pd.DataFrame(stories)
     df.set_index('stories_id', inplace=True)
     df['media_id'] = df['media_id'].astype(str)
     df['publish_date'] = pd.to_datetime(df.publish_date)
     df['publish_date'] = df['publish_date'].dt.strftime('%d/%m/%Y')
     df['tag'] = ''
-    df.to_csv('clipping.csv')
-    with open('clipping_tagged.csv', 'w', newline='') as csvfile:
+    df.to_csv('clippingFOLHA.csv')
+    with open('clipping_taggedFOLHA.csv', 'w', newline='') as csvfile:
         fieldnames = ['stories_id'] + list(df)
         writer = csv.writer(csvfile)
         writer.writerow(fieldnames)

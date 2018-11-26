@@ -21,13 +21,7 @@ class FacebookRequest:
         r = requests.get(self.api_url, params=params)
         data = r.json()
         print(data)
-        #engagement = data['engagement']
-        ####provisório para testar o app do site
-        try:
-            engagement = data['engagement']
-        except KeyError:
-            engagement = {'share_count': 0, 'reaction_count': 0}
-        ####
+        engagement = data['engagement']
         og_object = data.get('og_object', None)
         description = None
         if og_object:
